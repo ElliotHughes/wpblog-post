@@ -109,3 +109,13 @@ msgstr "https://wpfanyi.com/"
 
 #~ msgid "WordPress Blog Location Settings"
 #~ msgstr "文派博客位置设置"
+
+#. Author URI of the plugin/theme
+msgid "IPChannel"
+msgstr "IP查询渠道"
+
+msgid "IPChannel-local"
+msgstr "本地数据库"
+
+msgid "IPChannel-ipapi"
+msgstr "API"

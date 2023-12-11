@@ -27,6 +27,8 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
+// Default Ip Checker
+define( 'WPBLOG_POST_DEFAULT_IP_CHECKER', 'local' );
 
 // Load required files
 require_once plugin_dir_path( __FILE__ ) . 'includes/Reader.php';
@@ -80,15 +82,22 @@ function wpblog_post_settings_page() {
     if ( ! current_user_can( 'manage_options' ) ) {
         wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wpblog-post' ) );
     }
-
+    
+    $allowIpChecker = [
+        'local',
+        'ipapi',
+    ];
+    
     // Handle form submission
     if ( isset( $_POST['wpblog_post_save_settings'] ) ) {
         $show_post_location = isset($_POST['show_post_location']) ? true : false;
         $show_comment_location = isset($_POST['show_comment_location']) ? true : false;
         $show_author_location = isset($_POST['wpblog_post_show_author_location']) ? true : false;
+        $post_location_ip_checker = $_POST['ip_channel'] ?? WPBLOG_POST_DEFAULT_IP_CHECKER;
         update_option('wpblog_post_show_author_location', $show_author_location);
         update_option('wpblog_post_show_post_location', $show_post_location);
         update_option('wpblog_post_show_comment_location', $show_comment_location);
+        update_option('wpblog_post_ip_checker', $post_location_ip_checker);
 
         update_option('wpblog_post_display_info', $_POST['wpblog_post_display_info']);
         // Display success message
@@ -98,6 +107,7 @@ function wpblog_post_settings_page() {
     // Get current options
     $show_post_location = get_option( 'wpblog_post_show_post_location', false );
     $show_comment_location = get_option( 'wpblog_post_show_comment_location', true );
+    $post_location_ip_checker = get_option( 'wpblog_post_ip_checker', WPBLOG_POST_DEFAULT_IP_CHECKER );
 
     // Render HTML
 ?>
@@ -116,6 +126,17 @@ function wpblog_post_settings_page() {
                 <tr>
                     <th scope="row"><?php esc_html_e( 'Comments', 'wpblog-post' ); ?></th>
                     <td><label><input type="checkbox" name="show_comment_location" value="1" <?php checked( $show_comment_location, true ); ?>> <?php esc_html_e( 'Show location', 'wpblog-post' ); ?></label></td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'IPChannel', 'wpblog-post' ); ?></th>
+                    <td>
+                    <?php foreach ($allowIpChecker as $checker) : ?>
+                        <label style="margin-right: 20px;">
+                            <input type="radio" name="ip_channel" value="<?php echo esc_attr($checker); ?>" <?php checked($post_location_ip_checker, $checker); ?>>
+                            <?php esc_html_e('IPChannel-' . $checker, 'wpblog-post'); ?>
+                        </label>
+                    <?php endforeach; ?>
+                    </td>
                 </tr>
             </tbody>
         </table>

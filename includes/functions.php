@@ -3,12 +3,29 @@
 // Function to get user city based on IP address
 function get_user_city($ip)
 {
-  $reader = new Reader(__DIR__ . '/ipipfree.ipdb');
-  try {
-    return $reader->find($ip) ? $reader->find($ip)[1] : false;
-  } catch (\Throwable $th) {
-    return false;
-  }
+    $ipChannel = get_option('wpblog_post_ip_checker', WPBLOG_POST_DEFAULT_IP_CHECKER);
+    
+    switch ($ipChannel) {
+        case WPBLOG_POST_DEFAULT_IP_CHECKER:
+        default:
+            $reader = new Reader(__DIR__ . '/ipipfree.ipdb');
+            try {
+                return $reader->find($ip) ? $reader->find($ip)[1] : false;
+            } catch (\Throwable $th) {
+                return false;
+            }
+        case 'ipapi':
+            $url = 'http://ip-api.com/json/'. $ip .'/?lang=zh-CN';
+            $response = wp_remote_get($url);
+            if (is_wp_error($response)) {
+                echo 'Error: ' . $response->get_error_message();
+                return false;
+            } else {
+                $body = wp_remote_retrieve_body($response);
+                $arr = json_decode($body, true) ?? [];
+                return $arr['city'] ?? '';
+            }
+    }
 }
 
 
