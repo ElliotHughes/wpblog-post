@@ -27,9 +27,8 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-// Default Ip Checker
-define( 'WPBLOG_POST_DEFAULT_IP_CHECKER', 'local' );
-define( 'WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT', 'city' );
+// All WP Blog Constant
+require plugin_dir_path( __FILE__ ) . 'includes/const/WpBlogConst.php';
 
 // Load required files
 require_once plugin_dir_path( __FILE__ ) . 'includes/Reader.php';
@@ -107,14 +106,14 @@ function wpblog_post_settings_page() {
         $show_post_location = isset($_POST['show_post_location']) ? true : false;
         $show_comment_location = isset($_POST['show_comment_location']) ? true : false;
         $show_author_location = isset($_POST['wpblog_post_show_author_location']) ? true : false;
-        $post_location_ip_checker = $_POST['ip_channel'] ?? WPBLOG_POST_DEFAULT_IP_CHECKER;
+        $post_location_ip_checker = $_POST['ip_channel'] ?? WpBlogConst::WPBLOG_POST_DEFAULT_IP_CHECKER;
 
         if ( ! empty( $_POST['ip_address_format'] ) && isset( $_POST['ip_address_format_custom'] )
             && '\c\u\s\t\o\m' === wp_unslash( $_POST['ip_address_format'] )
         ) {
             $_POST['ip_address_format'] = $_POST['ip_address_format_custom'];
         }
-        $post_location_ip_address_format = $_POST['ip_address_format']?? WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT;
+        $post_location_ip_address_format = $_POST['ip_address_format']?? WpBlogConst::WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT;
         update_option('wpblog_post_show_author_location', $show_author_location);
         update_option('wpblog_post_show_post_location', $show_post_location);
         update_option('wpblog_post_show_comment_location', $show_comment_location);
@@ -129,10 +128,10 @@ function wpblog_post_settings_page() {
     // Get current options
     $show_post_location = get_option( 'wpblog_post_show_post_location', false );
     $show_comment_location = get_option( 'wpblog_post_show_comment_location', true );
-    $post_location_ip_checker = get_option( 'wpblog_post_ip_checker', WPBLOG_POST_DEFAULT_IP_CHECKER );
+    $post_location_ip_checker = get_option( 'wpblog_post_ip_checker', WpBlogConst::WPBLOG_POST_DEFAULT_IP_CHECKER );
     $post_location_ip_address_format = get_option(
         'wpblog_post_ip_address_format',
-        WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT
+        WpBlogConst::WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT
     );
 
     // Render HTML

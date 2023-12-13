@@ -1,6 +1,5 @@
 <?php
 
-require __DIR__ . '/const/WpBlogConst.php';
 // ip checker service
 class IpCheckerService
 {
@@ -25,7 +24,7 @@ class IpCheckerService
         // if empty city country region can't see
         if (empty($city) && empty($country) && empty($region)) return '';
 
-        $result = get_option('wpblog_post_ip_address_format', WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT);
+        $result = get_option('wpblog_post_ip_address_format', WpBlogConst::WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT);
         $result = str_replace(WpBlogConst::IP_ADDRESS_CITY, $city, $result);
         $result = str_replace(WpBlogConst::IP_ADDRESS_COUNTRY, $country, $result);
         $result = str_replace(WpBlogConst::IP_ADDRESS_REGION, $region, $result);
@@ -38,14 +37,14 @@ class IpCheckerService
     {
         if (isset($this->ips[$ip])) return $this->ips[$ip];
         if (empty($ip)) return '';
-        $ipChecker = get_option('wpblog_post_ip_checker', WPBLOG_POST_DEFAULT_IP_CHECKER);
+        $ipChecker = get_option('wpblog_post_ip_checker', WpBlogConst::WPBLOG_POST_DEFAULT_IP_CHECKER);
         $dataArr = [
             WpBlogConst::IP_ADDRESS_CITY => '',
             WpBlogConst::IP_ADDRESS_COUNTRY => '',
             WpBlogConst::IP_ADDRESS_REGION => ''
         ];
         switch ($ipChecker) {
-            case WPBLOG_POST_DEFAULT_IP_CHECKER:
+            case WpBlogConst::WPBLOG_POST_DEFAULT_IP_CHECKER:
             default:
                 $reader = new Reader(__DIR__ . '/ipipfree.ipdb');
                 try {
