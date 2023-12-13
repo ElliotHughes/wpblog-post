@@ -3,7 +3,6 @@
 // Function to get user city based on IP address
 function get_user_city($ip)
 {
-    $ip = '183.6.24.237';
     $ipAddressFormat = get_option(
         'wpblog_post_ip_address_format',
         WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT

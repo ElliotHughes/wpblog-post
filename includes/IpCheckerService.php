@@ -47,7 +47,6 @@ class IpCheckerService
         switch ($ipChecker) {
             case WPBLOG_POST_DEFAULT_IP_CHECKER:
             default:
-                // 国   省   市
                 $reader = new Reader(__DIR__ . '/ipipfree.ipdb');
                 try {
                     if ($reader->find($ip)) {
@@ -60,13 +59,18 @@ class IpCheckerService
                     return '';
                 }
             case 'ipapi':
-                $url = 'http://ip-api.com/json/'. $ip .'/?lang=zh-CN';
+                // api url
+                $url = 'http://ip-api.com/json/'. $ip .'?lang=zh-CN';
                 $response = wp_remote_get($url);
+                // if err != nil
                 if (is_wp_error($response)) return '';
-
+                
                 $body = wp_remote_retrieve_body($response);
                 $arr = json_decode($body, true) ?? [];
-                return $this->format_ip_address_city($arr);
+                $dataArr['city'] = $arr['city'] ?? '';
+                $dataArr['region'] = $arr['regionName'] ?? '';
+                $dataArr['country'] = $arr['country'] ?? '';
+                return $this->format_ip_address_city($dataArr);
         }
     }
 }
