@@ -3,47 +3,36 @@
 // Function to get user city based on IP address
 function get_user_city($ip)
 {
-    $ipChannel = get_option('wpblog_post_ip_checker', WPBLOG_POST_DEFAULT_IP_CHECKER);
-    
-    switch ($ipChannel) {
-        case WPBLOG_POST_DEFAULT_IP_CHECKER:
-        default:
-            $reader = new Reader(__DIR__ . '/ipipfree.ipdb');
-            try {
-                return $reader->find($ip) ? $reader->find($ip)[1] : false;
-            } catch (\Throwable $th) {
-                return false;
-            }
-        case 'ipapi':
-            $url = 'http://ip-api.com/json/'. $ip .'/?lang=zh-CN';
-            $response = wp_remote_get($url);
-            if (is_wp_error($response)) {
-                echo 'Error: ' . $response->get_error_message();
-                return false;
-            } else {
-                $body = wp_remote_retrieve_body($response);
-                $arr = json_decode($body, true) ?? [];
-                return $arr['city'] ?? '';
-            }
-    }
+    $ip = '183.6.24.237';
+    $ipAddressFormat = get_option(
+        'wpblog_post_ip_address_format',
+        WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT
+    );
+    return IpCheckerService::getInstance()->getIpCheckerByIp($ip, $ipAddressFormat);
 }
 
 
 // Function to handle comment display
 if (!function_exists('wpblog_post_handle_comment')) {
-    function wpblog_post_handle_comment($comment_text) {
-        $comment_ID = get_comment_ID();
-        $comment = get_comment($comment_ID);
+    function wpblog_post_handle_comment($comment_text, $comment = null) {
+        if (!$comment) {
+            $comment_ID = get_comment_ID();
+            $comment = get_comment($comment_ID);
+        }
         $show_comment_location = get_option('wpblog_post_show_comment_location', false);
-
-        if ($show_comment_location && $comment->comment_author_IP && get_user_city($comment->comment_author_IP)) {
-            $comment_text .= '<div class="post-comment-location"><span class="dashicons dashicons-location"></span>' . esc_html__( 'From', 'wpblog-post' ) . '' . get_user_city($comment->comment_author_IP) . '</div>';
+        $ipTips = get_user_city($comment->comment_author_IP);
+        if ($show_comment_location && $comment && $comment->comment_author_IP && $ipTips) {
+            $comment_text .= '<div class="post-comment-location">'
+                .'<span class="dashicons dashicons-location"></span>'
+                .esc_html__( 'From', 'wpblog-post' )
+                .' '
+                .$ipTips . '</div>';
         }
 
         return $comment_text;
     }
 }
-add_filter('comment_text', 'wpblog_post_handle_comment');
+add_filter('comment_text', 'wpblog_post_handle_comment', 10, 2);
 
 
 // Function to handle post editing

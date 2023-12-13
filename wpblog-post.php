@@ -29,16 +29,25 @@ if (!defined('ABSPATH')) {
 
 // Default Ip Checker
 define( 'WPBLOG_POST_DEFAULT_IP_CHECKER', 'local' );
+define( 'WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT', 'city' );
 
 // Load required files
 require_once plugin_dir_path( __FILE__ ) . 'includes/Reader.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/functions.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/IpCheckerService.php';
 
 // Enqueue plugin CSS and dashicons CSS
 add_action( 'wp_enqueue_scripts', 'wpblog_post_enqueue_css' );
 function wpblog_post_enqueue_css() {
     wp_enqueue_style( 'wpblog_post_css', plugin_dir_url( __FILE__ ) . 'assets/css/location.css' );
     wp_enqueue_style( 'dashicons' );
+}
+
+// Enqueue plugin CSS and dashicons JS
+add_action( 'admin_menu', 'wpblog_post_enqueue_js' );
+function wpblog_post_enqueue_js() {
+    wp_register_script('custom-script', plugin_dir_url( __FILE__ ) . 'assets/js/wpblog-post.js');
+    wp_enqueue_script('custom-script');
 }
 
 
@@ -83,9 +92,14 @@ function wpblog_post_settings_page() {
         wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'wpblog-post' ) );
     }
     
-    $allowIpChecker = [
+    $allowIpCheckerArr = [
         'local',
         'ipapi',
+    ];
+    $addressFormatArr = [
+        'city',
+        'country, region, city',
+        'city, region, country',
     ];
     
     // Handle form submission
@@ -94,10 +108,18 @@ function wpblog_post_settings_page() {
         $show_comment_location = isset($_POST['show_comment_location']) ? true : false;
         $show_author_location = isset($_POST['wpblog_post_show_author_location']) ? true : false;
         $post_location_ip_checker = $_POST['ip_channel'] ?? WPBLOG_POST_DEFAULT_IP_CHECKER;
+
+        if ( ! empty( $_POST['ip_address_format'] ) && isset( $_POST['ip_address_format_custom'] )
+            && '\c\u\s\t\o\m' === wp_unslash( $_POST['ip_address_format'] )
+        ) {
+            $_POST['ip_address_format'] = $_POST['ip_address_format_custom'];
+        }
+        $post_location_ip_address_format = $_POST['ip_address_format']?? WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT;
         update_option('wpblog_post_show_author_location', $show_author_location);
         update_option('wpblog_post_show_post_location', $show_post_location);
         update_option('wpblog_post_show_comment_location', $show_comment_location);
         update_option('wpblog_post_ip_checker', $post_location_ip_checker);
+        update_option('wpblog_post_ip_address_format', $post_location_ip_address_format);
 
         update_option('wpblog_post_display_info', $_POST['wpblog_post_display_info']);
         // Display success message
@@ -108,6 +130,10 @@ function wpblog_post_settings_page() {
     $show_post_location = get_option( 'wpblog_post_show_post_location', false );
     $show_comment_location = get_option( 'wpblog_post_show_comment_location', true );
     $post_location_ip_checker = get_option( 'wpblog_post_ip_checker', WPBLOG_POST_DEFAULT_IP_CHECKER );
+    $post_location_ip_address_format = get_option(
+        'wpblog_post_ip_address_format',
+        WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT
+    );
 
     // Render HTML
 ?>
@@ -130,12 +156,51 @@ function wpblog_post_settings_page() {
                 <tr>
                     <th scope="row"><?php esc_html_e( 'IPChannel', 'wpblog-post' ); ?></th>
                     <td>
-                    <?php foreach ($allowIpChecker as $checker) : ?>
+                    <?php foreach ($allowIpCheckerArr as $checker) : ?>
                         <label style="margin-right: 20px;">
                             <input type="radio" name="ip_channel" value="<?php echo esc_attr($checker); ?>" <?php checked($post_location_ip_checker, $checker); ?>>
                             <?php esc_html_e('IPChannel-' . $checker, 'wpblog-post'); ?>
                         </label>
                     <?php endforeach; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'IPAddressFormat', 'wpblog-post' ); ?></th>
+                    <td>
+                        <fieldset><legend class="screen-reader-text"><span>
+                            <?php
+                            /* translators: Hidden accessibility text. */
+                            _e( 'Date Format' );
+                            ?>
+                        </span></legend>
+                            <?php
+
+                            $custom = true;
+
+                            foreach ( $addressFormatArr as $format ) {
+                                echo "\t<label class='options-general-php'><input type='radio' name='ip_address_format' value='" .
+                                    esc_attr($format ) . "'";
+                                if ( $post_location_ip_address_format === $format ) {
+                                    echo " checked='checked'";
+                                    $custom = false;
+                                }
+                                echo ' /> <span class="date-time-text format-i18n">';
+                                esc_html_e( $format, 'wpblog-post' );
+                                echo '</span><code>' . $format . "</code></label><br />\n";
+                            }
+
+                            echo '<label><input type="radio" name="ip_address_format" id="ip_address_format_custom_radio" value="\c\u\s\t\o\m"';
+                            checked( $custom );
+                            echo '/> </label>' .
+                                '<label for="ip_address_format_custom" class="screen-reader-text">' .
+                                __( 'Custom date format:' ) .
+                                '</label>' .
+                                '<input style="width: 140px" type="text" name="ip_address_format_custom" id="ip_address_format_custom" value="' .
+                                esc_attr( $post_location_ip_address_format ) .
+                                '" class="small-text" />' .
+                                '<br />';
+                            ?>
+                        </fieldset>
                     </td>
                 </tr>
             </tbody>
