@@ -39,14 +39,23 @@ class IpCheckerService
         if (isset($this->ips[$ip])) return $this->ips[$ip];
         if (empty($ip)) return '';
         $ipChecker = get_option('wpblog_post_ip_checker', WPBLOG_POST_DEFAULT_IP_CHECKER);
+        $dataArr = [
+            'city' => '',
+            'country' => '',
+            'region' => ''
+        ];
         switch ($ipChecker) {
             case WPBLOG_POST_DEFAULT_IP_CHECKER:
             default:
                 // 国   省   市
                 $reader = new Reader(__DIR__ . '/ipipfree.ipdb');
                 try {
-
-                    return $reader->find($ip) ? $reader->find($ip)[1] : '';
+                    if ($reader->find($ip)) {
+                        $dataArr['city'] = $reader->find($ip)[2];
+                        $dataArr['region'] = $reader->find($ip)[1];
+                        $dataArr['country'] = $reader->find($ip)[0];
+                    }
+                    return $this->format_ip_address_city($dataArr);
                 } catch (\Throwable $th) {
                     return '';
                 }
@@ -57,7 +66,7 @@ class IpCheckerService
 
                 $body = wp_remote_retrieve_body($response);
                 $arr = json_decode($body, true) ?? [];
-                return $arr['city'] ?? '';
+                return $this->format_ip_address_city($arr);
         }
     }
 }
