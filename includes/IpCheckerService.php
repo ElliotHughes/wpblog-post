@@ -22,11 +22,10 @@ class IpCheckerService
         $country = $arr[WpBlogConst::IP_ADDRESS_COUNTRY] ?? '';
         $region = $arr[WpBlogConst::IP_ADDRESS_REGION] ?? '';
 
-        $ipAddressFormat = get_option('wpblog_post_ip_address_format', WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT);
-        if (empty($city) && empty($country) && empty($region)) return $ipAddressFormat;
+        // if empty city country region can't see
+        if (empty($city) && empty($country) && empty($region)) return '';
 
-        $result = $ipAddressFormat;
-
+        $result = get_option('wpblog_post_ip_address_format', WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT);
         $result = str_replace(WpBlogConst::IP_ADDRESS_CITY, $city, $result);
         $result = str_replace(WpBlogConst::IP_ADDRESS_COUNTRY, $country, $result);
         $result = str_replace(WpBlogConst::IP_ADDRESS_REGION, $region, $result);
