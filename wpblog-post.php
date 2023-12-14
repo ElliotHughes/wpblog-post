@@ -230,7 +230,7 @@ function wpblog_post_settings_page() {
                                 esc_attr( $ip_address_custom_for_admin == WpBlogConst::WPBLOG_POST_DEFAULT_FALSE ? ''
                                     : $ip_address_custom_for_admin ) .
                                 '" class="small-text" />';
-                            $ipAddressItemStr = 'Tips: ';
+                            $ipAddressItemStr = esc_html__('Tips') . ': ';
                             $ipAddressItemArr = [];
                             foreach (['country', 'region', 'city'] as $ipAddressItem) {
                                 $ipAddressItemArr[] = $ipAddressItem . "=" . translate( $ipAddressItem, 'wpblog-post' );
