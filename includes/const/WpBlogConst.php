@@ -11,4 +11,5 @@ class WpBlogConst
     
     const WPBLOG_POST_DEFAULT_IP_CHECKER = 'local';
     const WPBLOG_POST_DEFAULT_IP_ADDRESS_FORMAT = 'city';
+    const WPBLOG_POST_DEFAULT_FALSE = 'f/a/l/s/e';
 }

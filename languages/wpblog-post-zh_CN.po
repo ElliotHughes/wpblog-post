@@ -137,3 +137,9 @@ msgstr "国家/地区, 省份, 城市"
 
 msgid "city, region, country"
 msgstr "城市, 省份, 国家/地区"
+
+msgid "IPAddressCustomForAdmin"
+msgstr "管理员自定义地址"
+
+msgid "f/a/l/s/e"
+msgstr "关闭"
