@@ -49,7 +49,18 @@ if (!function_exists('wpblog_post_handle_post_content')) {
         $show_author_location = get_option('wpblog_post_show_author_location', false);
 
         if ($show_author_location && get_post_meta($post->ID, 'wpblog_post_ip', true)) {
-            $location_info = '<div class="post-author-location"><span class="dashicons dashicons-location"></span>' . __('Author from', 'wpblog-post') . '' . get_user_ip_address_info(get_post_meta($post->ID, 'wpblog_post_ip', true)) . '</div>';
+            $ip_address_custom_for_admin = get_option(
+                'wpblog_post_ip_address_custom_for_admin',
+                WpBlogConst::WPBLOG_POST_DEFAULT_FALSE
+            );
+
+
+            if ($ip_address_custom_for_admin != WpBlogConst::WPBLOG_POST_DEFAULT_FALSE) {
+                $city = $ip_address_custom_for_admin;
+            } else{
+                $city = get_user_ip_address_info(get_post_meta($post->ID, 'wpblog_post_ip', true));
+            }
+            $location_info = '<div class="post-author-location"><span class="dashicons dashicons-location"></span>' . __('Author from', 'wpblog-post') . '' . $city . '</div>';
             $content = $location_info . $content;
         }
 
@@ -64,8 +75,17 @@ function wpblog_post_handle_post_content_end($content) {
     $location_info = '';
     $show_post_location = get_option('wpblog_post_show_post_location', false);
 
+    $ip_address_custom_for_admin = get_option(
+        'wpblog_post_ip_address_custom_for_admin',
+        WpBlogConst::WPBLOG_POST_DEFAULT_FALSE
+    );
+
+    if ($ip_address_custom_for_admin != WpBlogConst::WPBLOG_POST_DEFAULT_FALSE) {
+        $city = $ip_address_custom_for_admin;
+    }
+
     if (get_option('wpblog_post_show', true) && get_post_meta($post->ID, 'wpblog_post_ip', true) && $show_post_location) {
-       $location_info = '<div class="post-author-location"><span class="dashicons dashicons-location"></span>' . __('Author from', 'wpblog-post') . '' . get_user_ip_address_info(get_post_meta($post->ID, 'wpblog_post_ip', true)) . '</div>';
+       $location_info = '<div class="post-author-location"><span class="dashicons dashicons-location"></span>' . __('Author from', 'wpblog-post') . '' . $city . '</div>';
     }
 
     return $content . $location_info;
@@ -97,6 +117,15 @@ add_shortcode( 'wpblog_post_location', 'wpblog_post_shortcode' );
 function wpblog_author_location_shortcode() {
     $ip = get_post_meta(get_the_ID(), 'wpblog_post_ip', true);
     $city = get_user_ip_address_info($ip);
+
+    $ip_address_custom_for_admin = get_option(
+        'wpblog_post_ip_address_custom_for_admin',
+        WpBlogConst::WPBLOG_POST_DEFAULT_FALSE
+    );
+
+    if ($ip_address_custom_for_admin !== WpBlogConst::WPBLOG_POST_DEFAULT_FALSE) {
+        $city = $ip_address_custom_for_admin;
+    }
 
     if ($city) {
         return '<div class="post-author-location"><span class="dashicons dashicons-location"></span>' . esc_html__( 'Author From', 'wpblog-post' ) . '' . $city . '</div>';
