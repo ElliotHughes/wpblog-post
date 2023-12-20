@@ -32,6 +32,7 @@ require plugin_dir_path( __FILE__ ) . 'includes/const/WpBlogConst.php';
 
 // Load required files
 require_once plugin_dir_path( __FILE__ ) . 'includes/Reader.php';
+require_once plugin_dir_path( __FILE__ ) . 'templates/WpBlogTemplate.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/functions.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/IpCheckerService.php';
 

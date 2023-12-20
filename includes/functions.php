@@ -17,11 +17,7 @@ if (!function_exists('wpblog_post_handle_comment')) {
         $show_comment_location = get_option('wpblog_post_show_comment_location', false);
         $ipTips = get_user_ip_address_info($comment->comment_author_IP);
         if ($show_comment_location && $comment && $comment->comment_author_IP && $ipTips) {
-            $comment_text .= '<div class="post-comment-location">'
-                .'<span class="dashicons dashicons-location"></span>'
-                .esc_html__( 'From', 'wpblog-post' )
-                .' '
-                .$ipTips . '</div>';
+            $comment_text .= WpBlogTemplate::return_comment_man_location($ipTips);
         }
 
         return $comment_text;
@@ -60,7 +56,8 @@ if (!function_exists('wpblog_post_handle_post_content')) {
             } else{
                 $city = get_user_ip_address_info(get_post_meta($post->ID, 'wpblog_post_ip', true));
             }
-            $location_info = '<div class="post-author-location"><span class="dashicons dashicons-location"></span>' . __('Author from', 'wpblog-post') . '' . $city . '</div>';
+
+            $location_info = WpBlogTemplate::return_post_author_location($city);
             $content = $location_info . $content;
         }
 
@@ -85,7 +82,7 @@ function wpblog_post_handle_post_content_end($content) {
     }
 
     if (get_option('wpblog_post_show', true) && get_post_meta($post->ID, 'wpblog_post_ip', true) && $show_post_location) {
-       $location_info = '<div class="post-author-location"><span class="dashicons dashicons-location"></span>' . __('Author from', 'wpblog-post') . '' . $city . '</div>';
+        $location_info = WpBlogTemplate::return_post_author_location($city);
     }
 
     return $content . $location_info;
@@ -104,11 +101,9 @@ function wpblog_post_shortcode($atts) {
     $ip = $a['ip'] ? $a['ip'] : filter_input(INPUT_SERVER, 'REMOTE_ADDR', FILTER_VALIDATE_IP);
     $city = get_user_ip_address_info($ip);
     if ($city) {
-        return '<div class="post-comment-location"><span class="dashicons dashicons-location"></span>' . esc_html__( 'From', 'wpblog-post' ) . '' . $city . '</div>';
-
-    } else {
-        return '';
+        return WpBlogTemplate::return_comment_man_location($city);
     }
+    return '';
 }
 add_shortcode( 'wpblog_post_location', 'wpblog_post_shortcode' );
 
@@ -128,9 +123,31 @@ function wpblog_author_location_shortcode() {
     }
 
     if ($city) {
-        return '<div class="post-author-location"><span class="dashicons dashicons-location"></span>' . esc_html__( 'Author From', 'wpblog-post' ) . '' . $city . '</div>';
-    } else {
-        return '';
+        return WpBlogTemplate::return_post_author_location($city);
     }
+    return '';
 }
 add_shortcode( 'wpblog_author_location', 'wpblog_author_location_shortcode' );
+
+// support bbpress reply
+if (!function_exists('reply_content_filter_func')) {
+    function reply_content_filter_func( $original_value, $reply = null) {
+        $reply_id = bbp_get_reply_id( $reply );
+        $user_ip_arr = get_post_meta($reply_id, '_bbp_author_ip');
+        $user_ip = '';
+        if (isset($user_ip_arr[0]) && $user_ip_arr[0] != '') {
+            $user_ip = $user_ip_arr[0];
+        }
+
+        $content = '';
+        if ($user_ip != '') {
+            $show_comment_location = get_option('wpblog_post_show_comment_location', false);
+            $city = get_user_ip_address_info($user_ip);
+            if ($show_comment_location && $city) {
+                $content = WpBlogTemplate::return_comment_man_location($city, true);
+            }
+        }
+        return $original_value . $content;
+    }
+}
+add_filter( 'bbp_get_reply_content', 'reply_content_filter_func', 10, 2);

@@ -21,7 +21,7 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 
-#: includes/functions.php:23 includes/functions.php:86
+#: includes/functions.php:23 includes/functions.php:86 templates/WpBlogTemplate.php:26
 msgid "From"
 msgstr "来自"
 
