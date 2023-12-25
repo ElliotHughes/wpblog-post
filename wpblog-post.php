@@ -130,7 +130,6 @@ function wpblog_post_settings_page() {
         update_option('wpblog_post_ip_address_format', $post_location_ip_address_format);
         update_option('wpblog_post_ip_address_custom_for_admin', $ip_address_custom_for_admin);
 
-        update_option('wpblog_post_display_info', $_POST['wpblog_post_display_info']);
         // Display success message
         echo '<div id="setting-error-settings_updated" class="updated settings-error notice is-dismissible"><p><strong>' . esc_html__( 'Settings saved.', 'wpblog-post' ) . '</strong></p></div>';
     }
